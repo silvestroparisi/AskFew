@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AskFew — your private AI, in your browser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{--bg:#0a0c10;--panel:#11151c;--panel-2:#161b24;--line:#222a36;--line-soft:#1a212b;--txt:#dfe6f0;--txt-dim:#8893a4;--txt-faint:#5b6573;--accent:#37e0b0;--warn:#ff9a3c;--danger:#ff3b53;--grid:rgba(120,140,170,0.045);--op:#a78bfa;}
+  html[data-theme="light"]{--bg:#f5f7fa;--panel:#ffffff;--panel-2:#eef1f6;--line:#dde3ec;--line-soft:#e8edf3;--txt:#141a24;--txt-dim:#54607a;--txt-faint:#8b94a6;--accent:#0fae82;--warn:#d9731a;--danger:#e11d48;--grid:rgba(30,50,90,0.05);--op:#6d4bff;}
+  *{box-sizing:border-box;} html,body{margin:0;padding:0;scroll-behavior:smooth;overflow-x:hidden;}
+  body{background:var(--bg);color:var(--txt);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;min-height:100vh;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:42px 42px;}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+  .topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:12px 22px;background:rgba(10,12,16,.72);backdrop-filter:blur(9px);border-bottom:1px solid var(--line-soft);}
+  html[data-theme="light"] .topbar{background:rgba(245,247,250,.8);}
+  .tb-brand{font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.02em;font-size:16px;display:flex;align-items:center;gap:9px;}
+  .tb-brand .ac,.modal h3 .ac,.handoff .ac{color:var(--accent);}
+  .tb-brand .dot{width:8px;height:8px;border-radius:2px;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:pulse 2.6s infinite;}
+  .tb-right{display:flex;gap:10px;align-items:center;}
+  button,label.btn{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;background:var(--panel-2);color:var(--txt);border:1px solid var(--line);padding:9px 14px;border-radius:7px;cursor:pointer;transition:.15s;text-transform:uppercase;}
+  button:hover,label.btn:hover{border-color:var(--accent);color:var(--accent);}
+  button.primary{background:var(--accent);color:#04140f;border-color:var(--accent);font-weight:600;}
+  button.primary:hover{filter:brightness(1.1);color:#04140f;}
+  button:disabled{opacity:.45;cursor:not-allowed;}
+  button:disabled:hover{border-color:var(--line);color:var(--txt);}
+  .langsw,.themesw{display:inline-flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;font-family:'IBM Plex Mono',monospace;font-size:11px;}
+  .langsw span,.themesw span{padding:8px 12px;cursor:pointer;color:var(--txt-faint);user-select:none;letter-spacing:.06em;}
+  .langsw span.on,.themesw span.on{background:var(--accent);color:#04140f;font-weight:600;}
+  .langsw span:hover:not(.on),.themesw span:hover:not(.on){color:var(--txt);}
+
+  .hero{position:relative;min-height:90vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;padding:60px 22px;}
+  .dotfield{position:absolute;inset:0;z-index:0;}
+  .dotfield i{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--txt-faint);opacity:.22;}
+  .dotfield i.ac{background:var(--accent);opacity:1;box-shadow:0 0 13px var(--accent);width:6px;height:6px;animation:pulse 2.6s infinite;}
+  .hero::after{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 60% 50% at 50% 45%,transparent 30%,var(--bg) 90%);}
+  .hero-inner{position:relative;z-index:2;max-width:920px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--accent);margin-bottom:22px;opacity:0;animation:fu .6s .1s forwards;}
+  .hero h1{font-family:'Space Mono',monospace;font-weight:700;font-size:clamp(34px,6.6vw,76px);line-height:1.06;margin:0;letter-spacing:-.01em;}
+  .hero h1 .b1{display:block;opacity:0;animation:fu .6s .22s forwards;}
+  .hero h1 .b2{display:block;color:var(--accent);opacity:0;animation:fu .6s .36s forwards;}
+  .hero .sub{max-width:680px;margin:26px auto 0;font-size:clamp(15px,1.8vw,19px);color:var(--txt-dim);line-height:1.6;opacity:0;animation:fu .6s .52s forwards;}
+  .hero .cta{margin-top:34px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;opacity:0;animation:fu .6s .68s forwards;}
+  .hero .cta button{padding:14px 22px;font-size:13px;border-radius:9px;}
+  .scrollcue{position:absolute;bottom:22px;left:50%;color:var(--txt-faint);font-size:20px;z-index:2;animation:bob 1.8s infinite;}
+
+  .story{max-width:1000px;margin:0 auto;padding:10px 22px;}
+  .block{padding:52px 0;border-top:1px solid var(--line-soft);opacity:0;transform:translateY(22px);transition:.7s ease;}
+  .block.in{opacity:1;transform:none;}
+  .block .eyebrow{animation:none;opacity:1;margin-bottom:14px;}
+  .block h2{font-family:'Space Mono',monospace;font-weight:700;font-size:clamp(26px,4vw,42px);margin:0 0 14px;line-height:1.1;}
+  .lead{font-size:clamp(15px,1.7vw,18px);color:var(--txt-dim);line-height:1.65;max-width:720px;margin:0;}
+  .lead b{color:var(--txt);}
+  .signals{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px;}
+  .sigcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;border-top:3px solid var(--accent);}
+  .sigcard:nth-child(1){border-top-color:var(--danger);}.sigcard:nth-child(2){border-top-color:var(--warn);}.sigcard:nth-child(3){border-top-color:var(--op);}
+  .sigcard h3{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.05em;margin:0 0 9px;}
+  .sigcard p{margin:0;font-size:13px;color:var(--txt-dim);line-height:1.55;}
+  .mission,.privacy{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:30px 28px;}
+  .privacy{border-left:3px solid var(--accent);}
+  @media(max-width:760px){.signals{grid-template-columns:1fr;}}
+
+  .app{max-width:900px;margin:34px auto 0;padding:0 22px 120px;scroll-margin-top:62px;}
+  .app-head{padding:76px 0 8px;border-top:1px solid var(--line-soft);}
+  .app-head h2{font-family:'Space Mono',monospace;font-size:clamp(22px,3vw,32px);margin:6px 0 0;}
+  .datanote{margin-top:16px;background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:9px;padding:11px 14px;font-size:12.5px;color:var(--txt-dim);line-height:1.55;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;margin-top:32px;}
+  .panel h3{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt-dim);margin:0 0 14px;font-weight:500;}
+  .panel.unsupported{border-left:3px solid var(--danger);}
+  .panel.unsupported h3{color:var(--danger);}
+  .status{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--txt-dim);}
+  .hint{margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txt-faint);line-height:1.7;}
+  .hidden{display:none !important;}
+
+  .modelrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .modelrow select{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-family:'IBM Plex Mono',monospace;font-size:12.5px;padding:9px 12px;cursor:pointer;}
+  .modelrow select:focus{outline:none;border-color:var(--accent);}
+  .progwrap{margin-top:16px;}
+  .progbar{height:8px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;overflow:hidden;}
+  .progbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s;}
+
+  .chathead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+  .chathead h3{margin:0;}
+  .chatlog{display:flex;flex-direction:column;gap:13px;max-height:56vh;overflow-y:auto;padding:4px 2px;}
+  .msg{max-width:88%;padding:11px 14px;border-radius:13px;font-size:13.5px;line-height:1.58;white-space:pre-wrap;overflow-wrap:anywhere;}
+  .msg.user{align-self:flex-end;background:var(--accent);color:#04140f;border-bottom-right-radius:4px;}
+  .msg.ai{align-self:flex-start;background:var(--panel-2);border:1px solid var(--line);border-bottom-left-radius:4px;}
+  .msg.ai.gen::after{content:"▋";animation:blink 1s infinite;color:var(--accent);}
+  .msg.sys{align-self:center;background:transparent;color:var(--txt-faint);font-family:'IBM Plex Mono',monospace;font-size:11.5px;text-align:center;max-width:96%;}
+  .chatin{display:flex;gap:10px;margin-top:14px;align-items:flex-end;}
+  .chatin textarea{flex:1;resize:none;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;padding:11px 13px;line-height:1.5;min-height:46px;max-height:160px;}
+  .chatin textarea:focus{outline:none;border-color:var(--accent);}
+  .chatin button{white-space:nowrap;}
+  .visnote{margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txt-faint);line-height:1.6;}
+
+  .handoff{margin-top:34px;background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+  .handoff .ho-txt{flex:1 1 320px;min-width:240px;}
+  .handoff .eyebrow{animation:none;opacity:1;margin-bottom:11px;}
+  .handoff h3{font-size:18px;font-weight:600;margin:0 0 8px;line-height:1.32;color:var(--txt);}
+  .handoff p{margin:0;font-size:13px;color:var(--txt-dim);line-height:1.55;}
+  .handoff a.cta-fx{flex:0 0 auto;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;background:var(--accent);color:#04140f;border:1px solid var(--accent);padding:13px 20px;border-radius:9px;text-decoration:none;font-weight:600;white-space:nowrap;transition:.15s;}
+  .handoff a.cta-fx:hover{filter:brightness(1.1);}
+  .handoff .ho-btns{display:flex;gap:8px;flex-wrap:wrap;flex:0 0 auto;}
+
+  footer{max-width:900px;margin:0 auto;padding:24px 22px 50px;border-top:1px solid var(--line-soft);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txt-faint);line-height:1.7;} footer a{color:var(--accent);text-decoration:none;}
+
+  .modal-bg{position:fixed;inset:0;z-index:90;background:rgba(4,7,11,.7);backdrop-filter:blur(4px);display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:50px 18px;}
+  .modal-bg.on{display:flex;}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:680px;width:100%;padding:34px 32px;position:relative;}
+  .modal h3{font-family:'Space Mono',monospace;font-size:22px;margin:0 0 6px;}
+  .modal h4{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:24px 0 8px;}
+  .modal p,.modal li{font-size:13.5px;color:var(--txt-dim);line-height:1.6;}
+  .modal code{background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--accent);font-size:12px;}
+  .modal .close{position:absolute;top:18px;right:18px;background:none;border:none;color:var(--txt-faint);font-size:22px;padding:4px 8px;}
+  .modal .close:hover{color:var(--danger);border:none;}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="tb-brand"><span class="dot"></span><span>Ask<span class="ac">Few</span></span></div>
+    <div class="tb-right">
+      <button id="btnHow"></button>
+      <div class="themesw"><span id="thDark" class="on">☾</span><span id="thLight">☀</span></div>
+      <div class="langsw"><span id="lgEn" class="on">EN</span><span id="lgIt">IT</span></div>
+    </div>
+  </div>
+
+  <section class="hero">
+    <div class="dotfield" id="dotfield"></div>
+    <div class="hero-inner">
+      <div class="eyebrow" id="heroEyebrow"></div>
+      <h1><span class="b1" id="heroH1a"></span><span class="b2" id="heroH1b"></span></h1>
+      <p class="sub" id="heroSub"></p>
+      <div class="cta">
+        <button class="primary" id="heroCta1"></button>
+        <button id="heroCta2"></button>
+      </div>
+    </div>
+    <div class="scrollcue">↓</div>
+  </section>
+
+  <div class="story">
+    <div class="block" id="blk1">
+      <div class="eyebrow" id="b1eye"></div>
+      <h2 id="b1h"></h2>
+      <p class="lead" id="b1p"></p>
+      <div class="signals">
+        <div class="sigcard"><h3 id="s1h"></h3><p id="s1p"></p></div>
+        <div class="sigcard"><h3 id="s2h"></h3><p id="s2p"></p></div>
+        <div class="sigcard"><h3 id="s3h"></h3><p id="s3p"></p></div>
+      </div>
+    </div>
+    <div class="block" id="blk2">
+      <div class="eyebrow" id="b2eye"></div>
+      <div class="mission"><h2 id="b2h"></h2><p class="lead" id="b2p"></p></div>
+    </div>
+    <div class="block" id="blk3">
+      <div class="eyebrow" id="b3eye"></div>
+      <div class="privacy"><h2 id="b3h"></h2><p class="lead" id="b3p"></p></div>
+    </div>
+  </div>
+
+  <section class="app" id="app">
+    <div class="app-head">
+      <div class="eyebrow" id="appEye"></div>
+      <h2 id="appH"></h2>
+      <div class="datanote" id="dataNote"></div>
+    </div>
+
+    <div class="panel hidden unsupported" id="unsupPanel">
+      <h3 id="unsupH"></h3>
+      <p class="lead" id="unsupP" style="font-size:13.5px;"></p>
+    </div>
+
+    <div class="panel hidden" id="setupPanel">
+      <h3 id="setupH"></h3>
+      <div class="modelrow">
+        <span id="modelLabel" style="font-size:13px;color:var(--txt-dim);font-family:'IBM Plex Mono',monospace;"></span>
+        <select id="modelSel"></select>
+        <button class="primary" id="btnLoad"></button>
+      </div>
+      <div class="progwrap hidden" id="progWrap">
+        <div class="progbar"><i id="progFill"></i></div>
+        <p class="status" id="progText" style="margin-top:8px;"></p>
+      </div>
+      <p class="status" id="setupNote" style="margin-top:10px;"></p>
+    </div>
+
+    <div class="panel hidden" id="chatPanel">
+      <div class="chathead">
+        <h3 id="chatH"></h3>
+        <button id="btnReset"></button>
+      </div>
+      <div class="chatlog" id="chatLog"></div>
+      <div class="chatin">
+        <textarea id="chatInput" rows="1"></textarea>
+        <button class="primary" id="btnSend"></button>
+        <button id="btnStop" class="hidden"></button>
+      </div>
+      <p class="visnote" id="chatNote"></p>
+    </div>
+  </section>
+
+  <footer id="footer"></footer>
+
+  <div class="modal-bg" id="modalBg">
+    <div class="modal">
+      <button class="close" id="mClose">×</button>
+      <h3 id="m_h1"></h3>
+      <p id="m_p1"></p>
+      <h4 id="m_h2"></h4>
+      <p id="m_p2"></p>
+      <h4 id="m_h3"></h4>
+      <p id="m_p3"></p>
+      <h4 id="m_h4"></h4>
+      <p id="m_p4"></p>
+    </div>
+  </div>
+
+<script>
+"use strict";
+const byId=id=>document.getElementById(id);
+
+/* ---------- models offered (WebLLM prebuilt MLC ids) ---------- */
+const MODELS=[
+ {id:'Llama-3.2-1B-Instruct-q4f16_1-MLC', size:'~0.9 GB', tier:'small'},
+ {id:'Llama-3.2-3B-Instruct-q4f16_1-MLC', size:'~2.3 GB', tier:'medium'},
+ {id:'Llama-3.1-8B-Instruct-q4f16_1-MLC', size:'~4.6 GB', tier:'large'}
+];
+const SYS={
+ en:"You are AskFew, a helpful, concise AI assistant running entirely on the user's own device, in their browser. Answer clearly and honestly. If you are not sure about something, say so rather than inventing.",
+ it:"Sei AskFew, un assistente AI utile e conciso che gira interamente sul dispositivo dell'utente, dentro il suo browser. Rispondi in modo chiaro e onesto. Se non sei sicuro di qualcosa, dillo invece di inventare."
+};
+
+/* ---------- i18n ---------- */
+const I18N={
+ en:{
+  how:`ⓘ How it works`,
+  heroEyebrow:`PRIVACY-FIRST · RUNS IN YOUR BROWSER`,
+  heroH1a:`Want AI without the cloud?`,
+  heroH1b:`Ask Few. It never leaves your browser.`,
+  heroSub:`AskFew runs a real language model entirely inside your browser — no account, no server, nothing uploaded. Your questions and its answers stay on your device. The more powerful your computer, the faster it runs: that's the price of privacy.`,
+  heroCta1:`Start the local AI`,
+  heroCta2:`How it works`,
+  b1eye:`THE TRAP`,
+  b1h:`You want the AI. You don't want to hand over your data.`,
+  b1p:`Every prompt you type into a cloud AI <b>leaves your device</b> — it's sent to a server, often stored, sometimes used to train the next model. And the private alternatives — Ollama, LM Studio, llama.cpp — are powerful but built for techies: terminals, downloads, configs. So most people are stuck choosing between privacy and AI.`,
+  s1h:`Your data leaves`,
+  s1p:`Paste a contract, an email, a medical report into a cloud chatbot and it's uploaded to someone else's servers. You can't take it back.`,
+  s2h:`Too technical`,
+  s2p:`Local engines exist, but installing Ollama or LM Studio and picking models from a command line is a wall most people never get over.`,
+  s3h:`The forced choice`,
+  s3p:`Give up privacy to use AI, or give up AI to keep privacy. AskFew is built to delete that choice for everyone.`,
+  b2eye:`THE IDEA`,
+  b2h:`Run the model where it's safe — your own machine.`,
+  b2p:`A real model runs <b>inside the page</b>, on your computer's own graphics hardware, using WebGPU. You open a web page, the model downloads once, and from then on every word you exchange stays local. No install, no account, no server in the middle. Free, open, and a single page you can read end to end.`,
+  b3eye:`THE TRADE-OFF`,
+  b3h:`Honest about the deal you're making.`,
+  b3p:`A model small enough to run in a browser is <b>not</b> as clever as a giant cloud one. It's great for drafting, summarizing, rewriting, and everyday questions — not for cutting-edge reasoning. The first use downloads the model (a one-time wait), and a stronger PC means faster replies. The price of total privacy is some power — for a lot of tasks, that's a fair trade.`,
+  appEye:`LOCAL AI`,
+  appH:`Your private AI`,
+  dataNote:`Runs a real AI model fully in your browser — nothing you type is uploaded. On first use it downloads the chosen model once (from ~0.9 GB), then keeps it cached. Needs <b>WebGPU</b> (best on desktop Chrome or Edge). It's a small local model: great for everyday tasks, not a match for a giant cloud AI.`,
+  unsupH:`This browser can't run a local AI (yet)`,
+  unsupP:`AskFew needs <b>WebGPU</b> to run a model on your device, and this browser or device doesn't make it available. It works best in <b>desktop Chrome or Edge</b>. Support in Safari and Firefox is improving, and on phones it's still limited. Try opening this page in Chrome or Edge on a computer.`,
+  setupH:`Set up your local AI`,
+  modelLabel:`Model:`,
+  btnLoad:`Load model`,
+  setup_loaded:`Loaded and cached — next time it starts almost instantly.`,
+  tier_small:`Small — fast, runs on most laptops`,
+  tier_medium:`Medium — balanced`,
+  tier_large:`Large — needs a strong GPU / PC`,
+  prog_lib:`Loading the engine…`,
+  prog_init:`Preparing…`,
+  prog_load:`Downloading model…`,
+  prog_ready:`Model ready.`,
+  prog_err:`Couldn't load:`,
+  chatH:`Chat — 100% local`,
+  btnSend:`Send`,
+  btnStop:`Stop`,
+  btnReset:`New chat`,
+  chatPlaceholder:`Ask anything — it stays on your device…`,
+  chat_welcome:`You're talking to a model running entirely on your device. Nothing you type leaves the browser.`,
+  chat_err:`error:`,
+  chatNote:`It's a small local model — fast and private, but it can be wrong. Double-check anything important. The first reply may be slow while the model warms up.`,
+  m_h1:`What AskFew is`,
+  m_p1:`A real language model that runs <b>entirely in your browser</b>, on your own machine, using WebGPU (via the open-source WebLLM engine). No account, no server, no cloud — your conversation never leaves the device.`,
+  m_h2:`What it's good for`,
+  m_p2:`Drafting and rewriting text, summarizing something you paste in, answering everyday questions, brainstorming. It's a small local model, so it won't match a giant cloud AI on hard reasoning — but for a lot of daily tasks it's more than enough, and completely private.`,
+  m_h3:`Privacy`,
+  m_p3:`Nothing you type is uploaded. The only thing that comes <i>in</i> is the model itself, downloaded once from a public CDN and then cached in your browser. After that it can run offline. Don't trust the claim? It's a single page — read it.`,
+  m_h4:`Requirements & limits`,
+  m_p4:`Needs <b>WebGPU</b> (desktop Chrome or Edge work best). The first load downloads a large model file (one-time), and speed depends on your hardware — a stronger PC is much faster. It's not a fact oracle: it can be confidently wrong, so verify anything that matters.`,
+  footer:`<div style="margin-bottom:9px"><b style="color:var(--txt)">The Few toolkit</b> · <a href="https://github.com/silvestroparisi/FirstFew" target="_blank" rel="noopener">FirstFew</a> · <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">FixFew</a> · <a href="https://github.com/silvestroparisi/MaskFew" target="_blank" rel="noopener">MaskFew</a> · AskFew</div>Built by <b style="color:var(--txt)">Silvestro Parisi</b> · open source · runs entirely in your browser.`
+ },
+ it:{
+  how:`ⓘ Come funziona`,
+  heroEyebrow:`PRIVACY-FIRST · GIRA NEL TUO BROWSER`,
+  heroH1a:`Vuoi l'AI senza il cloud?`,
+  heroH1b:`Chiedi a Few. Non lascia il browser.`,
+  heroSub:`AskFew fa girare un vero modello linguistico interamente dentro il tuo browser — niente account, niente server, niente caricato. Le tue domande e le sue risposte restano sul tuo dispositivo. Più è potente il computer, più è veloce: è il prezzo della privacy.`,
+  heroCta1:`Avvia l'AI locale`,
+  heroCta2:`Come funziona`,
+  b1eye:`LA TRAPPOLA`,
+  b1h:`Vuoi l'AI. Ma non vuoi consegnare i tuoi dati.`,
+  b1p:`Ogni messaggio che scrivi a un'AI cloud <b>lascia il tuo dispositivo</b> — va su un server, spesso viene archiviato, a volte usato per addestrare il modello successivo. E le alternative private — Ollama, LM Studio, llama.cpp — sono potenti ma fatte per smanettoni: terminali, download, configurazioni. Così quasi tutti restano a scegliere tra privacy e AI.`,
+  s1h:`I tuoi dati escono`,
+  s1p:`Incolli un contratto, una mail, un referto medico in un chatbot cloud e finisce sui server di qualcun altro. Non puoi più riprendertelo.`,
+  s2h:`Troppo tecnico`,
+  s2p:`I motori locali esistono, ma installare Ollama o LM Studio e scegliere i modelli da riga di comando è un muro che i più non superano mai.`,
+  s3h:`La scelta forzata`,
+  s3p:`Rinunciare alla privacy per usare l'AI, o rinunciare all'AI per tenere la privacy. AskFew nasce per cancellare questa scelta, per tutti.`,
+  b2eye:`L'IDEA`,
+  b2h:`Fai girare il modello dove è sicuro — la tua macchina.`,
+  b2p:`Un vero modello gira <b>dentro la pagina</b>, sulla scheda grafica del tuo computer, tramite WebGPU. Apri una pagina web, il modello si scarica una volta, e da lì in poi ogni parola che scambi resta in locale. Niente installazione, niente account, nessun server in mezzo. Gratuito, aperto, e una sola pagina che puoi leggere dall'inizio alla fine.`,
+  b3eye:`IL COMPROMESSO`,
+  b3h:`Onesti sul patto che stai facendo.`,
+  b3p:`Un modello abbastanza piccolo da girare nel browser <b>non</b> è furbo come uno enorme nel cloud. È ottimo per scrivere bozze, riassumere, riscrivere e per le domande di tutti i giorni — non per ragionamenti al limite. Il primo utilizzo scarica il modello (un'attesa una tantum), e un PC più potente significa risposte più veloci. Il prezzo della privacy totale è un po' di potenza — per tante cose, è uno scambio giusto.`,
+  appEye:`AI LOCALE`,
+  appH:`La tua AI privata`,
+  dataNote:`Fa girare un vero modello AI interamente nel tuo browser — niente di ciò che scrivi viene caricato. Al primo uso scarica una volta il modello scelto (da ~0,9 GB), poi lo tiene in cache. Serve <b>WebGPU</b> (meglio su Chrome o Edge da desktop). È un piccolo modello locale: ottimo per le cose di tutti i giorni, non all'altezza di un'AI cloud gigante.`,
+  unsupH:`Questo browser non può ancora far girare un'AI locale`,
+  unsupP:`AskFew ha bisogno di <b>WebGPU</b> per far girare un modello sul tuo dispositivo, e questo browser o dispositivo non lo rende disponibile. Funziona meglio su <b>Chrome o Edge da desktop</b>. Il supporto in Safari e Firefox sta migliorando, e su telefono è ancora limitato. Prova ad aprire questa pagina con Chrome o Edge su un computer.`,
+  setupH:`Configura la tua AI locale`,
+  modelLabel:`Modello:`,
+  btnLoad:`Carica modello`,
+  setup_loaded:`Caricato e in cache — la prossima volta parte quasi subito.`,
+  tier_small:`Piccolo — veloce, gira su quasi tutti i portatili`,
+  tier_medium:`Medio — bilanciato`,
+  tier_large:`Grande — serve una GPU / PC potente`,
+  prog_lib:`Carico il motore…`,
+  prog_init:`Preparazione…`,
+  prog_load:`Scarico il modello…`,
+  prog_ready:`Modello pronto.`,
+  prog_err:`Caricamento fallito:`,
+  chatH:`Chat — 100% locale`,
+  btnSend:`Invia`,
+  btnStop:`Ferma`,
+  btnReset:`Nuova chat`,
+  chatPlaceholder:`Chiedi qualsiasi cosa — resta sul tuo dispositivo…`,
+  chat_welcome:`Stai parlando con un modello che gira interamente sul tuo dispositivo. Niente di ciò che scrivi lascia il browser.`,
+  chat_err:`errore:`,
+  chatNote:`È un piccolo modello locale — veloce e privato, ma può sbagliare. Verifica le cose importanti. La prima risposta può essere lenta mentre il modello si scalda.`,
+  m_h1:`Cos'è AskFew`,
+  m_p1:`Un vero modello linguistico che gira <b>interamente nel tuo browser</b>, sulla tua macchina, tramite WebGPU (con il motore open-source WebLLM). Niente account, niente server, niente cloud — la tua conversazione non lascia mai il dispositivo.`,
+  m_h2:`A cosa serve`,
+  m_p2:`Scrivere e riscrivere testi, riassumere qualcosa che incolli, rispondere a domande di tutti i giorni, fare brainstorming. È un piccolo modello locale, quindi non regge il confronto con un'AI cloud gigante sui ragionamenti difficili — ma per tante cose quotidiane basta e avanza, ed è completamente privato.`,
+  m_h3:`Privacy`,
+  m_p3:`Niente di ciò che scrivi viene caricato. L'unica cosa che <i>entra</i> è il modello stesso, scaricato una volta da una CDN pubblica e poi messo in cache nel browser. Dopodiché può girare offline. Non ti fidi della promessa? È una sola pagina — leggila.`,
+  m_h4:`Requisiti e limiti`,
+  m_p4:`Serve <b>WebGPU</b> (Chrome o Edge da desktop funzionano meglio). Il primo caricamento scarica un file di modello grande (una tantum), e la velocità dipende dall'hardware — un PC più potente è molto più rapido. Non è un oracolo: può sbagliare con sicurezza, quindi verifica ciò che conta.`,
+  footer:`<div style="margin-bottom:9px"><b style="color:var(--txt)">Il toolkit Few</b> · <a href="https://github.com/silvestroparisi/FirstFew" target="_blank" rel="noopener">FirstFew</a> · <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">FixFew</a> · <a href="https://github.com/silvestroparisi/MaskFew" target="_blank" rel="noopener">MaskFew</a> · AskFew</div>Creato da <b style="color:var(--txt)">Silvestro Parisi</b> · open source · gira interamente nel tuo browser.`
+ }
+};
+
+let LANG='en';
+const T=()=>I18N[LANG];
+
+function buildModelOptions(){
+ const t=T(); const sel=byId('modelSel'); const prev=sel.value; sel.innerHTML='';
+ MODELS.forEach(m=>{ const o=document.createElement('option'); o.value=m.id; o.textContent=t['tier_'+m.tier]+' · '+m.size; sel.appendChild(o); });
+ if(prev) sel.value=prev;
+}
+
+function applyLang(){
+ const t=T();
+ const direct=['how','heroEyebrow','heroH1a','heroH1b','heroSub','heroCta1','heroCta2','b1eye','b1h','s1h','s2h','s3h','b2eye','b2h','b3eye','b3h','appEye','appH','unsupH','setupH','modelLabel','btnLoad','chatH','btnSend','btnStop','btnReset'];
+ direct.forEach(k=>{ const el=byId(k==='how'?'btnHow':k); if(el) el.textContent=t[k]; });
+ byId('b1p').innerHTML=t.b1p; byId('s1p').innerHTML=t.s1p; byId('s2p').innerHTML=t.s2p; byId('s3p').innerHTML=t.s3p;
+ byId('b2p').innerHTML=t.b2p; byId('b3p').innerHTML=t.b3p;
+ byId('dataNote').innerHTML=t.dataNote; byId('unsupP').innerHTML=t.unsupP;
+ byId('chatNote').innerHTML=t.chatNote; byId('footer').innerHTML=t.footer;
+ ['m_h1','m_h2','m_h3','m_h4'].forEach(k=>byId(k).textContent=t[k]);
+ ['m_p1','m_p2','m_p3','m_p4'].forEach(k=>byId(k).innerHTML=t[k]);
+ byId('chatInput').placeholder=t.chatPlaceholder;
+ buildModelOptions();
+}
+
+/* ---------- theme + lang switches ---------- */
+function setLang(l){ LANG=l; byId('lgEn').classList.toggle('on',l==='en'); byId('lgIt').classList.toggle('on',l==='it'); document.documentElement.lang=l; applyLang(); }
+function setTheme(th){ document.documentElement.setAttribute('data-theme',th); byId('thDark').classList.toggle('on',th!=='light'); byId('thLight').classList.toggle('on',th==='light'); }
+byId('lgEn').onclick=()=>setLang('en'); byId('lgIt').onclick=()=>setLang('it');
+byId('thDark').onclick=()=>setTheme('dark'); byId('thLight').onclick=()=>setTheme('light');
+
+/* ---------- hero dotfield + reveal ---------- */
+(function(){ const df=byId('dotfield'); if(!df) return; let h='';
+ for(let i=0;i<46;i++){ const ac=Math.random()<0.12; h+=`<i class="${ac?'ac':''}" style="left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%"></i>`; }
+ df.innerHTML=h; })();
+const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); }),{threshold:.15});
+['blk1','blk2','blk3'].forEach(id=>{ const el=byId(id); if(el) io.observe(el); });
+
+/* ---------- modal ---------- */
+function openModal(){ byId('modalBg').classList.add('on'); }
+function closeModal(){ byId('modalBg').classList.remove('on'); }
+byId('btnHow').onclick=openModal; byId('heroCta2').onclick=openModal; byId('mClose').onclick=closeModal;
+byId('modalBg').onclick=e=>{ if(e.target===byId('modalBg')) closeModal(); };
+byId('heroCta1').onclick=()=>byId('app').scrollIntoView({behavior:'smooth'});
+
+/* ---------- WebGPU capability check ---------- */
+async function checkCaps(){
+ let ok=false;
+ try{ if(navigator.gpu){ const ad=await navigator.gpu.requestAdapter(); ok=!!ad; } }catch(e){ ok=false; }
+ byId('unsupPanel').classList.toggle('hidden', ok);
+ byId('setupPanel').classList.toggle('hidden', !ok);
+ return ok;
+}
+
+/* ---------- WebLLM engine + chat ---------- */
+let webllm=null, engine=null, history=[], generating=false;
+function setProg(pct){ byId('progFill').style.width=Math.max(0,Math.min(100,pct))+'%'; }
+function scrollChat(){ const c=byId('chatLog'); c.scrollTop=c.scrollHeight; }
+function addMsg(role,text){ const el=document.createElement('div'); el.className='msg '+role; el.textContent=text; byId('chatLog').appendChild(el); scrollChat(); return el; }
+
+async function loadModel(){
+ const t=T(); const id=byId('modelSel').value;
+ byId('btnLoad').disabled=true; byId('modelSel').disabled=true;
+ byId('progWrap').classList.remove('hidden'); byId('setupNote').textContent='';
+ byId('progText').textContent=t.prog_init; setProg(0);
+ try{
+  if(!webllm){ byId('progText').textContent=t.prog_lib; webllm=await import('https://esm.run/@mlc-ai/web-llm'); }
+  if(engine){ await engine.unload(); engine=null; }
+  engine=await webllm.CreateMLCEngine(id,{ initProgressCallback:(p)=>{ const pct=Math.round((p&&p.progress?p.progress:0)*100); setProg(pct); byId('progText').textContent=(p&&p.text?p.text:t.prog_load); } });
+  byId('progText').textContent=t.prog_ready; setProg(100);
+  byId('setupNote').textContent=t.setup_loaded;
+  byId('chatPanel').classList.remove('hidden');
+  resetChat();
+  byId('chatInput').focus();
+ }catch(e){
+  byId('progText').textContent=t.prog_err+' '+(e&&e.message?e.message:String(e));
+ }
+ byId('btnLoad').disabled=false; byId('modelSel').disabled=false;
+}
+
+function resetChat(){
+ byId('chatLog').innerHTML=''; history=[{role:'system',content:SYS[LANG]}];
+ addMsg('sys', T().chat_welcome);
+}
+
+async function send(){
+ if(generating || !engine) return;
+ const ta=byId('chatInput'); const text=ta.value.trim(); if(!text) return;
+ ta.value=''; ta.style.height='auto';
+ addMsg('user', text); history.push({role:'user',content:text});
+ generating=true; byId('btnSend').disabled=true; byId('btnStop').classList.remove('hidden');
+ const aiEl=addMsg('ai',''); aiEl.classList.add('gen'); let acc='';
+ try{
+  const stream=await engine.chat.completions.create({ messages:history, stream:true, temperature:0.7 });
+  for await(const chunk of stream){ const d=chunk&&chunk.choices&&chunk.choices[0]&&chunk.choices[0].delta&&chunk.choices[0].delta.content; if(d){ acc+=d; aiEl.textContent=acc; scrollChat(); } }
+  history.push({role:'assistant',content:acc});
+ }catch(e){
+  aiEl.textContent=(acc?acc+'\n\n':'')+'['+T().chat_err+' '+(e&&e.message?e.message:String(e))+']';
+ }
+ aiEl.classList.remove('gen');
+ generating=false; byId('btnSend').disabled=false; byId('btnStop').classList.add('hidden'); scrollChat();
+}
+
+function stopGen(){ try{ if(engine && engine.interruptGenerate) engine.interruptGenerate(); }catch(e){} }
+
+/* ---------- wiring ---------- */
+byId('btnLoad').onclick=loadModel;
+byId('btnSend').onclick=send;
+byId('btnStop').onclick=stopGen;
+byId('btnReset').onclick=resetChat;
+byId('chatInput').addEventListener('input',function(){ this.style.height='auto'; this.style.height=Math.min(160,this.scrollHeight)+'px'; });
+byId('chatInput').addEventListener('keydown',e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
+
+/* ---------- init ---------- */
+setTheme('dark'); setLang('en'); checkCaps();
+</script>
+</body>
+</html>
