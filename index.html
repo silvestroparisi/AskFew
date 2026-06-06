@@ -129,7 +129,7 @@
   .attachchip .x:hover{color:var(--danger);}
   .famly{max-width:900px;margin:0 auto;padding:8px 22px 4px;}
   .famly-h{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-faint);margin:0 0 11px;}
-  .famly-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+  .famly-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
   @media(max-width:620px){.famly-grid{grid-template-columns:1fr;}}
   .famcard{display:flex;flex-direction:column;gap:3px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 28px 12px 14px;text-decoration:none;transition:.15s;position:relative;}
   .famcard::after{content:"→";position:absolute;top:12px;right:13px;color:var(--txt-faint);font-size:12px;transition:.15s;}
@@ -235,6 +235,7 @@
       <a class="famcard" href="https://silvestroparisi.github.io/FirstFew/" target="_blank" rel="noopener"><span class="famname">First<span class="ac">Few</span></span><span class="famtag" id="famFirst"></span></a>
       <a class="famcard" href="https://silvestroparisi.github.io/FixFew/" target="_blank" rel="noopener"><span class="famname">Fix<span class="ac">Few</span></span><span class="famtag" id="famFix"></span></a>
       <a class="famcard" href="https://silvestroparisi.github.io/MaskFew/" target="_blank" rel="noopener"><span class="famname">Mask<span class="ac">Few</span></span><span class="famtag" id="famMask"></span></a>
+      <a class="famcard" href="https://silvestroparisi.github.io/ScrubFew/" target="_blank" rel="noopener"><span class="famname">Scrub<span class="ac">Few</span></span><span class="famtag" id="famScrub"></span></a>
     </div>
   </div>
 
@@ -349,6 +350,7 @@ const I18N={
   famFirst:`Prioritize the few that matter.`,
   famFix:`Fix the few — verified.`,
   famMask:`Mask the few that expose you.`,
+  famScrub:`Strip the few traces you can't see.`,
   footer:`Built by <b style="color:var(--txt)">Silvestro Parisi</b> · open source · runs entirely in your browser.<div style="margin-top:9px">More from me on <a href="https://github.com/silvestroparisi" target="_blank" rel="noopener">github.com/silvestroparisi</a></div>`
  },
  it:{
@@ -420,6 +422,7 @@ const I18N={
   famFirst:`Prioritizza i pochi che contano.`,
   famFix:`Sistema i pochi — verificati.`,
   famMask:`Maschera i pochi che ti espongono.`,
+  famScrub:`Cancella le poche tracce nascoste.`,
   footer:`Creato da <b style="color:var(--txt)">Silvestro Parisi</b> · open source · gira interamente nel tuo browser.<div style="margin-top:9px">Altro da me su <a href="https://github.com/silvestroparisi" target="_blank" rel="noopener">github.com/silvestroparisi</a></div>`
  }
 };
@@ -441,7 +444,7 @@ function applyLang(){
  byId('b2p').innerHTML=t.b2p; byId('b3p').innerHTML=t.b3p;
  byId('dataNote').innerHTML=t.dataNote; byId('unsupP').innerHTML=t.unsupP;
  byId('chatNote').innerHTML=t.chatNote; byId('footer').innerHTML=t.footer;
- byId('famlyH').textContent=t.famlyH; byId('famFirst').textContent=t.famFirst; byId('famFix').textContent=t.famFix; byId('famMask').textContent=t.famMask;
+ byId('famlyH').textContent=t.famlyH; byId('famFirst').textContent=t.famFirst; byId('famFix').textContent=t.famFix; byId('famMask').textContent=t.famMask; byId('famScrub').textContent=t.famScrub;
  ['m_h1','m_h2','m_h3','m_h4'].forEach(k=>byId(k).textContent=t[k]);
  ['m_p1','m_p2','m_p3','m_p4'].forEach(k=>byId(k).innerHTML=t[k]);
  byId('fwTitle').textContent=t.attach_title; byId('fwBody').innerHTML=t.attach_body; byId('fwOk').textContent=t.attach_ok;
