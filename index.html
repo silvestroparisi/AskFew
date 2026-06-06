@@ -119,6 +119,14 @@
   .modal code{background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--accent);font-size:12px;}
   .modal .close{position:absolute;top:18px;right:18px;background:none;border:none;color:var(--txt-faint);font-size:22px;padding:4px 8px;}
   .modal .close:hover{color:var(--danger);border:none;}
+  #fileInChat{display:none;}
+  #attachBtn{display:inline-flex;align-items:center;justify-content:center;padding:0 13px;min-height:46px;font-size:15px;}
+  #attachWrap{margin:2px 0 4px;}
+  .attachchip{display:inline-flex;align-items:center;gap:9px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--txt-dim);max-width:100%;}
+  .attachchip.warn{border-left:3px solid var(--warn);}
+  .attachchip .ld{color:var(--txt-faint);}
+  .attachchip .x{cursor:pointer;color:var(--txt-faint);font-size:14px;}
+  .attachchip .x:hover{color:var(--danger);}
 </style>
 </head>
 <body>
@@ -198,7 +206,10 @@
         <button id="btnReset"></button>
       </div>
       <div class="chatlog" id="chatLog"></div>
+      <div id="attachWrap"></div>
       <div class="chatin">
+        <label class="btn" id="attachBtn" for="fileInChat">📎</label>
+        <input type="file" id="fileInChat" />
         <textarea id="chatInput" rows="1"></textarea>
         <button class="primary" id="btnSend"></button>
         <button id="btnStop" class="hidden"></button>
@@ -220,6 +231,15 @@
       <p id="m_p3"></p>
       <h4 id="m_h4"></h4>
       <p id="m_p4"></p>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="fileWarn">
+    <div class="modal">
+      <button class="close" id="fwClose">×</button>
+      <h3 id="fwTitle"></h3>
+      <p id="fwBody"></p>
+      <button class="primary" id="fwOk" style="margin-top:8px;"></button>
     </div>
   </div>
 
@@ -296,6 +316,15 @@ const I18N={
   m_p3:`Nothing you type is uploaded. The only thing that comes <i>in</i> is the model itself, downloaded once from a public CDN and then cached in your browser. After that it can run offline. Don't trust the claim? You don't have to — it's open source. Open your DevTools → Network: you'll see the model download once, and after that nothing about your conversation ever leaves your device.`,
   m_h4:`Requirements & limits`,
   m_p4:`Needs <b>WebGPU</b> (desktop Chrome or Edge work best). The first load downloads a large model file (one-time), and speed depends on your hardware — a stronger PC is much faster. It's not a fact oracle: it can be confidently wrong, so verify anything that matters.`,
+  attach_title:`Attaching a file`,
+  attach_body:`The file's text is added to the conversation and read by the model on your device — it never leaves your browser. But a small local model can only hold a little at a time: the file takes up its limited working memory (the <i>context</i>), leaving less room for the chat, and makes each reply slower because there's more to read. Large files are trimmed to fit. For the best results, attach short documents — or ask about one specific part.`,
+  attach_ok:`Got it`,
+  attach_reading:`reading…`,
+  attach_trimmed:`trimmed to fit the context`,
+  attach_image:`📎 Images can't be read — this is a text-only model.`,
+  attach_binary:`📎 This looks like a non-text file the model can't read.`,
+  attach_notext:`📎 No readable text found in this file.`,
+  attach_err:`📎 Couldn't read this file.`,
   footer:`<div style="margin-bottom:9px"><b style="color:var(--txt)">The Few toolkit</b> · <a href="https://github.com/silvestroparisi/FirstFew" target="_blank" rel="noopener">FirstFew</a> · <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">FixFew</a> · <a href="https://github.com/silvestroparisi/MaskFew" target="_blank" rel="noopener">MaskFew</a> · AskFew</div>Built by <b style="color:var(--txt)">Silvestro Parisi</b> · open source · runs entirely in your browser.`
  },
  it:{
@@ -354,6 +383,15 @@ const I18N={
   m_p3:`Niente di ciò che scrivi viene caricato. L'unica cosa che <i>entra</i> è il modello stesso, scaricato una volta da una CDN pubblica e poi messo in cache nel browser. Dopodiché può girare offline. Non ti fidi? Non devi — è open source. Apri i DevTools → Network: vedrai scaricare il modello una volta, e da lì in poi nulla delle tue conversazioni lascia il dispositivo.`,
   m_h4:`Requisiti e limiti`,
   m_p4:`Serve <b>WebGPU</b> (Chrome o Edge da desktop funzionano meglio). Il primo caricamento scarica un file di modello grande (una tantum), e la velocità dipende dall'hardware — un PC più potente è molto più rapido. Non è un oracolo: può sbagliare con sicurezza, quindi verifica ciò che conta.`,
+  attach_title:`Allegare un file`,
+  attach_body:`Il testo del file viene aggiunto alla conversazione e letto dal modello sul tuo dispositivo — non lascia mai il browser. Ma un modello locale piccolo tiene in testa poca roba alla volta: il file occupa la sua memoria di lavoro limitata (il <i>contesto</i>), lascia meno spazio alla chat e rende ogni risposta più lenta, perché c'è più da leggere. I file grandi vengono tagliati per farli stare. Per i risultati migliori allega documenti brevi — o chiedi di una parte specifica.`,
+  attach_ok:`Ho capito`,
+  attach_reading:`lettura…`,
+  attach_trimmed:`tagliato per stare nel contesto`,
+  attach_image:`📎 Le immagini non si leggono — è un modello solo testo.`,
+  attach_binary:`📎 Sembra un file non testuale che il modello non può leggere.`,
+  attach_notext:`📎 Nessun testo leggibile in questo file.`,
+  attach_err:`📎 Non sono riuscito a leggere il file.`,
   footer:`<div style="margin-bottom:9px"><b style="color:var(--txt)">Il toolkit Few</b> · <a href="https://github.com/silvestroparisi/FirstFew" target="_blank" rel="noopener">FirstFew</a> · <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">FixFew</a> · <a href="https://github.com/silvestroparisi/MaskFew" target="_blank" rel="noopener">MaskFew</a> · AskFew</div>Creato da <b style="color:var(--txt)">Silvestro Parisi</b> · open source · gira interamente nel tuo browser.`
  }
 };
@@ -377,6 +415,7 @@ function applyLang(){
  byId('chatNote').innerHTML=t.chatNote; byId('footer').innerHTML=t.footer;
  ['m_h1','m_h2','m_h3','m_h4'].forEach(k=>byId(k).textContent=t[k]);
  ['m_p1','m_p2','m_p3','m_p4'].forEach(k=>byId(k).innerHTML=t[k]);
+ byId('fwTitle').textContent=t.attach_title; byId('fwBody').innerHTML=t.attach_body; byId('fwOk').textContent=t.attach_ok;
  byId('chatInput').placeholder=t.chatPlaceholder;
  buildModelOptions();
 }
@@ -416,6 +455,57 @@ function setProg(pct){ byId('progFill').style.width=Math.max(0,Math.min(100,pct)
 function scrollChat(){ const c=byId('chatLog'); c.scrollTop=c.scrollHeight; }
 function addMsg(role,text){ const el=document.createElement('div'); el.className='msg '+role; el.textContent=text; byId('chatLog').appendChild(el); scrollChat(); return el; }
 
+function loadScript(src){ return new Promise((res,rej)=>{ if([...document.scripts].some(s=>s.src===src)) return res(); const s=document.createElement('script'); s.src=src; s.onload=()=>res(); s.onerror=()=>rej(new Error('failed to load '+src)); document.head.appendChild(s); }); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+const FILE_TEXT_CAP=6000;
+let attached=null, fileWarnShown=false;
+
+async function extractFileText(file){
+ const name=file.name.toLowerCase(); const ext=name.slice(name.lastIndexOf('.')+1);
+ if(file.type && file.type.indexOf('image/')===0) return {ok:false, reason:'image'};
+ try{
+  if(ext==='pdf'){
+   await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+   pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+   const buf=await file.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data:buf}).promise; let txt='';
+   for(let p=1;p<=pdf.numPages;p++){ const page=await pdf.getPage(p); const c=await page.getTextContent(); txt+=c.items.map(i=>i.str).join(' ')+'\n'; if(txt.length>FILE_TEXT_CAP*3) break; }
+   return {ok:txt.trim().length>0, text:txt, reason:txt.trim().length>0?null:'notext'};
+  }
+  if(ext==='docx'){
+   await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+   const buf=await file.arrayBuffer(); const zip=await JSZip.loadAsync(buf); const doc=zip.file('word/document.xml');
+   if(!doc) return {ok:false, reason:'notext'};
+   const xml=await doc.async('string');
+   const txt=(xml.match(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)||[]).map(m=>m.replace(/<[^>]+>/g,'')).join(' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+   return {ok:txt.trim().length>0, text:txt, reason:txt.trim().length>0?null:'notext'};
+  }
+  const text=await file.text(); const sample=text.slice(0,2000);
+  const bad=(sample.match(/[\u0000-\u0008\u000E-\u001F]/g)||[]).length;
+  if(bad>20) return {ok:false, reason:'binary'};
+  return {ok:text.trim().length>0, text, reason:text.trim().length>0?null:'notext'};
+ }catch(e){ return {ok:false, reason:'err'}; }
+}
+
+function clearAttach(){ attached=null; byId('attachWrap').innerHTML=''; byId('fileInChat').value=''; }
+
+async function onAttach(file){
+ if(!file) return; const t=T();
+ byId('attachWrap').innerHTML='<div class="attachchip">📎 '+esc(file.name)+' <span class="ld">'+t.attach_reading+'</span></div>';
+ const r=await extractFileText(file);
+ if(!r.ok){
+  attached=null;
+  const msg=r.reason==='image'?t.attach_image:(r.reason==='binary'?t.attach_binary:(r.reason==='err'?t.attach_err:t.attach_notext));
+  byId('attachWrap').innerHTML='<div class="attachchip warn">'+msg+' <span class="x" id="attachX">×</span></div>';
+  byId('attachX').onclick=clearAttach; byId('fileInChat').value=''; return;
+ }
+ let txt=r.text.replace(/[ \t]+\n/g,'\n').trim(); let truncated=false;
+ if(txt.length>FILE_TEXT_CAP){ txt=txt.slice(0,FILE_TEXT_CAP); truncated=true; }
+ attached={name:file.name, text:txt, truncated, sent:false};
+ byId('attachWrap').innerHTML='<div class="attachchip">📎 '+esc(file.name)+(truncated?' <span class="ld">'+t.attach_trimmed+'</span>':'')+' <span class="x" id="attachX">×</span></div>';
+ byId('attachX').onclick=clearAttach; byId('fileInChat').value='';
+ if(!fileWarnShown){ fileWarnShown=true; byId('fileWarn').classList.add('on'); }
+}
+
 async function loadModel(){
  const t=T(); const id=byId('modelSel').value;
  byId('btnLoad').disabled=true; byId('modelSel').disabled=true;
@@ -424,7 +514,7 @@ async function loadModel(){
  try{
   if(!webllm){ byId('progText').textContent=t.prog_lib; webllm=await import('https://esm.run/@mlc-ai/web-llm'); }
   if(engine){ await engine.unload(); engine=null; }
-  engine=await webllm.CreateMLCEngine(id,{ initProgressCallback:(p)=>{ const pct=Math.round((p&&p.progress?p.progress:0)*100); setProg(pct); byId('progText').textContent=(p&&p.text?p.text:t.prog_load); } });
+  engine=await webllm.CreateMLCEngine(id,{ appConfig:{...webllm.prebuiltAppConfig, useIndexedDBCache:true}, initProgressCallback:(p)=>{ const pct=Math.round((p&&p.progress?p.progress:0)*100); setProg(pct); byId('progText').textContent=(p&&p.text?p.text:t.prog_load); } });
   byId('progText').textContent=t.prog_ready; setProg(100);
   byId('setupNote').textContent=t.setup_loaded;
   byId('chatPanel').classList.remove('hidden');
@@ -438,14 +528,21 @@ async function loadModel(){
 
 function resetChat(){
  byId('chatLog').innerHTML=''; history=[{role:'system',content:SYS[LANG]}];
+ clearAttach();
  addMsg('sys', T().chat_welcome);
 }
 
 async function send(){
  if(generating || !engine) return;
- const ta=byId('chatInput'); const text=ta.value.trim(); if(!text) return;
+ const ta=byId('chatInput'); const text=ta.value.trim(); if(!text && !attached) return;
  ta.value=''; ta.style.height='auto';
- addMsg('user', text); history.push({role:'user',content:text});
+ let content=text;
+ if(attached && !attached.sent){
+  content='[Attached file: '+attached.name+(attached.truncated?' (trimmed)':'')+']\n"""\n'+attached.text+'\n"""\n\n'+(text||'Please read the attached file above.');
+  attached.sent=true;
+ }
+ addMsg('user', (text?text:'')+(attached?((text?'\n':'')+'📎 '+attached.name):''));
+ history.push({role:'user',content});
  generating=true; byId('btnSend').disabled=true; byId('btnStop').classList.remove('hidden');
  const aiEl=addMsg('ai',''); aiEl.classList.add('gen'); let acc='';
  try{
@@ -465,6 +562,10 @@ function stopGen(){ try{ if(engine && engine.interruptGenerate) engine.interrupt
 byId('btnLoad').onclick=loadModel;
 byId('btnSend').onclick=send;
 byId('btnStop').onclick=stopGen;
+byId('fileInChat').addEventListener('change',e=>onAttach(e.target.files[0]));
+byId('fwOk').onclick=()=>byId('fileWarn').classList.remove('on');
+byId('fwClose').onclick=()=>byId('fileWarn').classList.remove('on');
+byId('fileWarn').onclick=e=>{ if(e.target===byId('fileWarn')) byId('fileWarn').classList.remove('on'); };
 byId('btnReset').onclick=resetChat;
 byId('chatInput').addEventListener('input',function(){ this.style.height='auto'; this.style.height=Math.min(160,this.scrollHeight)+'px'; });
 byId('chatInput').addEventListener('keydown',e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
