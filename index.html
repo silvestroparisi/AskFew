@@ -127,6 +127,17 @@
   .attachchip .ld{color:var(--txt-faint);}
   .attachchip .x{cursor:pointer;color:var(--txt-faint);font-size:14px;}
   .attachchip .x:hover{color:var(--danger);}
+  .famly{max-width:900px;margin:0 auto;padding:8px 22px 4px;}
+  .famly-h{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-faint);margin:0 0 11px;}
+  .famly-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+  @media(max-width:620px){.famly-grid{grid-template-columns:1fr;}}
+  .famcard{display:flex;flex-direction:column;gap:3px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 28px 12px 14px;text-decoration:none;transition:.15s;position:relative;}
+  .famcard::after{content:"→";position:absolute;top:12px;right:13px;color:var(--txt-faint);font-size:12px;transition:.15s;}
+  .famcard:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .famcard:hover::after{color:var(--accent);transform:translateX(2px);}
+  .famname{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:var(--txt);}
+  .famname .ac{color:var(--accent);}
+  .famtag{font-size:11.5px;color:var(--txt-dim);line-height:1.4;}
 </style>
 </head>
 <body>
@@ -217,6 +228,15 @@
       <p class="visnote" id="chatNote"></p>
     </div>
   </section>
+
+  <div class="famly">
+    <div class="famly-h" id="famlyH"></div>
+    <div class="famly-grid">
+      <a class="famcard" href="https://silvestroparisi.github.io/FirstFew/" target="_blank" rel="noopener"><span class="famname">First<span class="ac">Few</span></span><span class="famtag" id="famFirst"></span></a>
+      <a class="famcard" href="https://silvestroparisi.github.io/FixFew/" target="_blank" rel="noopener"><span class="famname">Fix<span class="ac">Few</span></span><span class="famtag" id="famFix"></span></a>
+      <a class="famcard" href="https://silvestroparisi.github.io/MaskFew/" target="_blank" rel="noopener"><span class="famname">Mask<span class="ac">Few</span></span><span class="famtag" id="famMask"></span></a>
+    </div>
+  </div>
 
   <footer id="footer"></footer>
 
@@ -325,7 +345,11 @@ const I18N={
   attach_binary:`📎 This looks like a non-text file the model can't read.`,
   attach_notext:`📎 No readable text found in this file.`,
   attach_err:`📎 Couldn't read this file.`,
-  footer:`<div style="margin-bottom:9px"><b style="color:var(--txt)">The Few toolkit</b> · <a href="https://github.com/silvestroparisi/FirstFew" target="_blank" rel="noopener">FirstFew</a> · <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">FixFew</a> · <a href="https://github.com/silvestroparisi/MaskFew" target="_blank" rel="noopener">MaskFew</a> · AskFew</div>Built by <b style="color:var(--txt)">Silvestro Parisi</b> · open source · runs entirely in your browser.`
+  famlyH:`The rest of the Few toolkit`,
+  famFirst:`Prioritize the few that matter.`,
+  famFix:`Fix the few — verified.`,
+  famMask:`Mask the few that expose you.`,
+  footer:`Built by <b style="color:var(--txt)">Silvestro Parisi</b> · open source · runs entirely in your browser.<div style="margin-top:9px">More from me on <a href="https://github.com/silvestroparisi" target="_blank" rel="noopener">github.com/silvestroparisi</a></div>`
  },
  it:{
   how:`ⓘ Come funziona`,
@@ -392,7 +416,11 @@ const I18N={
   attach_binary:`📎 Sembra un file non testuale che il modello non può leggere.`,
   attach_notext:`📎 Nessun testo leggibile in questo file.`,
   attach_err:`📎 Non sono riuscito a leggere il file.`,
-  footer:`<div style="margin-bottom:9px"><b style="color:var(--txt)">Il toolkit Few</b> · <a href="https://github.com/silvestroparisi/FirstFew" target="_blank" rel="noopener">FirstFew</a> · <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">FixFew</a> · <a href="https://github.com/silvestroparisi/MaskFew" target="_blank" rel="noopener">MaskFew</a> · AskFew</div>Creato da <b style="color:var(--txt)">Silvestro Parisi</b> · open source · gira interamente nel tuo browser.`
+  famlyH:`Il resto del toolkit Few`,
+  famFirst:`Prioritizza i pochi che contano.`,
+  famFix:`Sistema i pochi — verificati.`,
+  famMask:`Maschera i pochi che ti espongono.`,
+  footer:`Creato da <b style="color:var(--txt)">Silvestro Parisi</b> · open source · gira interamente nel tuo browser.<div style="margin-top:9px">Altro da me su <a href="https://github.com/silvestroparisi" target="_blank" rel="noopener">github.com/silvestroparisi</a></div>`
  }
 };
 
@@ -413,6 +441,7 @@ function applyLang(){
  byId('b2p').innerHTML=t.b2p; byId('b3p').innerHTML=t.b3p;
  byId('dataNote').innerHTML=t.dataNote; byId('unsupP').innerHTML=t.unsupP;
  byId('chatNote').innerHTML=t.chatNote; byId('footer').innerHTML=t.footer;
+ byId('famlyH').textContent=t.famlyH; byId('famFirst').textContent=t.famFirst; byId('famFix').textContent=t.famFix; byId('famMask').textContent=t.famMask;
  ['m_h1','m_h2','m_h3','m_h4'].forEach(k=>byId(k).textContent=t[k]);
  ['m_p1','m_p2','m_p3','m_p4'].forEach(k=>byId(k).innerHTML=t[k]);
  byId('fwTitle').textContent=t.attach_title; byId('fwBody').innerHTML=t.attach_body; byId('fwOk').textContent=t.attach_ok;
