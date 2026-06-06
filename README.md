@@ -62,9 +62,9 @@ In-browser inference: [WebLLM](https://github.com/mlc-ai/web-llm) (MLC) over Web
 
 ## The Few toolkit
 
-- [**FirstFew**](https://github.com/silvestroparisi/FirstFew) — prioritize the few that matter
-- [**FixFew**](https://github.com/silvestroparisi/FixFew) — verify and remediate
-- [**MaskFew**](https://github.com/silvestroparisi/MaskFew) — anonymize a file before you share it
+- [**FirstFew**](https://silvestroparisi.github.io/FirstFew/) — prioritize the few that matter
+- [**FixFew**](https://silvestroparisi.github.io/FixFew/) — verify and remediate
+- [**MaskFew**](https://silvestroparisi.github.io/MaskFew/) — anonymize a file before you share it
 - **AskFew** — a private AI that runs in your browser
 
 ## License
