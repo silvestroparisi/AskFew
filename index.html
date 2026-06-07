@@ -179,6 +179,17 @@
       <div class="eyebrow" id="b2eye"></div>
       <div class="mission"><h2 id="b2h"></h2><p class="lead" id="b2p"></p></div>
     </div>
+    <div class="block" id="blkPriv">
+      <div class="eyebrow" id="pv_eye"></div>
+      <h2 id="pv_h"></h2>
+      <p class="lead" id="pv_p"></p>
+      <div class="signals">
+        <div class="sigcard"><h3 id="pvs1h"></h3><p id="pvs1p"></p></div>
+        <div class="sigcard"><h3 id="pvs2h"></h3><p id="pvs2p"></p></div>
+        <div class="sigcard"><h3 id="pvs3h"></h3><p id="pvs3p"></p></div>
+      </div>
+      <a class="cta-fx" id="pv_cta" href="https://github.com/silvestroparisi/AskFew" target="_blank" rel="noopener" style="margin-top:18px;display:inline-block"></a>
+    </div>
     <div class="block" id="blk3">
       <div class="eyebrow" id="b3eye"></div>
       <div class="privacy"><h2 id="b3h"></h2><p class="lead" id="b3p"></p></div>
@@ -236,6 +247,9 @@
       <a class="famcard" href="https://silvestroparisi.github.io/FixFew/" target="_blank" rel="noopener"><span class="famname">Fix<span class="ac">Few</span></span><span class="famtag" id="famFix"></span></a>
       <a class="famcard" href="https://silvestroparisi.github.io/MaskFew/" target="_blank" rel="noopener"><span class="famname">Mask<span class="ac">Few</span></span><span class="famtag" id="famMask"></span></a>
       <a class="famcard" href="https://silvestroparisi.github.io/ScrubFew/" target="_blank" rel="noopener"><span class="famname">Scrub<span class="ac">Few</span></span><span class="famtag" id="famScrub"></span></a>
+      <a class="famcard" href="https://silvestroparisi.github.io/RopaFew/" target="_blank" rel="noopener"><span class="famname">Ropa<span class="ac">Few</span></span><span class="famtag" id="famRopa"></span></a>
+      <a class="famcard" href="https://silvestroparisi.github.io/GapFew/" target="_blank" rel="noopener"><span class="famname">Gap<span class="ac">Few</span></span><span class="famtag" id="famGap"></span></a>
+      <a class="famcard" href="https://silvestroparisi.github.io/CloseFew/" target="_blank" rel="noopener"><span class="famname">Close<span class="ac">Few</span></span><span class="famtag" id="famClose"></span></a>
     </div>
   </div>
 
@@ -282,6 +296,16 @@ const SYS={
 /* ---------- i18n ---------- */
 const I18N={
  en:{
+  pv_eye:`PRIVATE BY DESIGN · OPEN SOURCE`,
+  pv_h:`Your conversations never leave your device.`,
+  pv_p:`The whole point is a private AI: the model runs inside your browser, so your prompts and the answers are never sent to any server. No account, no tracking, no logs.`,
+  pvs1h:`100% in your browser`,
+  pvs1p:`No server, no upload, no tracking. One HTML file that works even offline.`,
+  pvs2h:`Open source — don't trust, verify`,
+  pvs2p:`Don't take my word for it: the whole tool is one readable file. Open the source, or read it on GitHub.`,
+  pvs3h:`Free, for everyone`,
+  pvs3p:`Built so anyone — including small teams with no security budget — gets tools usually reserved for big organisations.`,
+  pv_cta:`Read the source on GitHub →`,
   how:`ⓘ How it works`,
   heroEyebrow:`PRIVACY-FIRST · RUNS IN YOUR BROWSER`,
   heroH1a:`Want AI without the cloud?`,
@@ -348,12 +372,25 @@ const I18N={
   attach_err:`📎 Couldn't read this file.`,
   famlyH:`The rest of the Few toolkit`,
   famFirst:`Prioritize the few that matter.`,
-  famFix:`Fix the few — verified.`,
+  famFix:`Fix the few that matter.`,
   famMask:`Mask the few that expose you.`,
   famScrub:`Strip the few traces you can't see.`,
+  famRopa:`Your Article 30 register, fast.`,
+  famGap:`Find the few gaps that matter.`,
+  famClose:`Close the few gaps that matter.`,
   footer:`Built by <b style="color:var(--txt)">Silvestro Parisi</b> · open source · runs entirely in your browser.<div style="margin-top:9px">More from me on <a href="https://github.com/silvestroparisi" target="_blank" rel="noopener">github.com/silvestroparisi</a></div>`
  },
  it:{
+  pv_eye:`PRIVATO PER NATURA · OPEN SOURCE`,
+  pv_h:`Le tue conversazioni non lasciano mai il tuo dispositivo.`,
+  pv_p:`Il senso è proprio un'AI privata: il modello gira dentro il tuo browser, quindi le tue domande e le risposte non vengono mai inviate ad alcun server. Niente account, niente tracciamento, niente log.`,
+  pvs1h:`100% nel tuo browser`,
+  pvs1p:`Nessun server, nessun upload, nessun tracciamento. Un file HTML che funziona anche offline.`,
+  pvs2h:`Open source — non fidarti, verifica`,
+  pvs2p:`Non credere sulla parola: tutto lo strumento è un file leggibile. Apri il sorgente, o leggilo su GitHub.`,
+  pvs3h:`Gratis, per tutti`,
+  pvs3p:`Pensato perché chiunque — anche le piccole realtà senza budget per la sicurezza — abbia strumenti di solito riservati alle grandi organizzazioni.`,
+  pv_cta:`Leggi il sorgente su GitHub →`,
   how:`ⓘ Come funziona`,
   heroEyebrow:`PRIVACY-FIRST · GIRA NEL TUO BROWSER`,
   heroH1a:`Vuoi l'AI senza il cloud?`,
@@ -420,9 +457,12 @@ const I18N={
   attach_err:`📎 Non sono riuscito a leggere il file.`,
   famlyH:`Il resto del toolkit Few`,
   famFirst:`Prioritizza i pochi che contano.`,
-  famFix:`Sistema i pochi — verificati.`,
+  famFix:`Sistema i pochi che contano.`,
   famMask:`Maschera i pochi che ti espongono.`,
   famScrub:`Cancella le poche tracce nascoste.`,
+  famRopa:`Il tuo registro art. 30, in fretta.`,
+  famGap:`Trova le poche lacune che contano.`,
+  famClose:`Chiudi le poche lacune che contano.`,
   footer:`Creato da <b style="color:var(--txt)">Silvestro Parisi</b> · open source · gira interamente nel tuo browser.<div style="margin-top:9px">Altro da me su <a href="https://github.com/silvestroparisi" target="_blank" rel="noopener">github.com/silvestroparisi</a></div>`
  }
 };
@@ -438,13 +478,13 @@ function buildModelOptions(){
 
 function applyLang(){
  const t=T();
- const direct=['how','heroEyebrow','heroH1a','heroH1b','heroSub','heroCta1','heroCta2','b1eye','b1h','s1h','s2h','s3h','b2eye','b2h','b3eye','b3h','appEye','appH','unsupH','setupH','modelLabel','btnLoad','chatH','btnSend','btnStop','btnReset'];
+ const direct=['pv_eye','pv_h','pv_p','pvs1h','pvs1p','pvs2h','pvs2p','pvs3h','pvs3p','pv_cta','how','heroEyebrow','heroH1a','heroH1b','heroSub','heroCta1','heroCta2','b1eye','b1h','s1h','s2h','s3h','b2eye','b2h','b3eye','b3h','appEye','appH','unsupH','setupH','modelLabel','btnLoad','chatH','btnSend','btnStop','btnReset'];
  direct.forEach(k=>{ const el=byId(k==='how'?'btnHow':k); if(el) el.textContent=t[k]; });
  byId('b1p').innerHTML=t.b1p; byId('s1p').innerHTML=t.s1p; byId('s2p').innerHTML=t.s2p; byId('s3p').innerHTML=t.s3p;
  byId('b2p').innerHTML=t.b2p; byId('b3p').innerHTML=t.b3p;
  byId('dataNote').innerHTML=t.dataNote; byId('unsupP').innerHTML=t.unsupP;
  byId('chatNote').innerHTML=t.chatNote; byId('footer').innerHTML=t.footer;
- byId('famlyH').textContent=t.famlyH; byId('famFirst').textContent=t.famFirst; byId('famFix').textContent=t.famFix; byId('famMask').textContent=t.famMask; byId('famScrub').textContent=t.famScrub;
+ byId('famlyH','famFirst','famFix','famMask','famScrub','famRopa','famGap','famClose').textContent=t.famlyH; byId('famFirst').textContent=t.famFirst; byId('famFix').textContent=t.famFix; byId('famMask').textContent=t.famMask; byId('famScrub').textContent=t.famScrub; byId('famRopa').textContent=t.famRopa; byId('famGap').textContent=t.famGap; byId('famClose').textContent=t.famClose;
  ['m_h1','m_h2','m_h3','m_h4'].forEach(k=>byId(k).textContent=t[k]);
  ['m_p1','m_p2','m_p3','m_p4'].forEach(k=>byId(k).innerHTML=t[k]);
  byId('fwTitle').textContent=t.attach_title; byId('fwBody').innerHTML=t.attach_body; byId('fwOk').textContent=t.attach_ok;
@@ -463,7 +503,7 @@ byId('thDark').onclick=()=>setTheme('dark'); byId('thLight').onclick=()=>setThem
  for(let i=0;i<46;i++){ const ac=Math.random()<0.12; h+=`<i class="${ac?'ac':''}" style="left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*100).toFixed(1)}%"></i>`; }
  df.innerHTML=h; })();
 const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); }),{threshold:.15});
-['blk1','blk2','blk3'].forEach(id=>{ const el=byId(id); if(el) io.observe(el); });
+['blk1','blk2','blkPriv','blk3'].forEach(id=>{ const el=byId(id); if(el) io.observe(el); });
 
 /* ---------- modal ---------- */
 function openModal(){ byId('modalBg').classList.add('on'); }
